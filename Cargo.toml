@@ -1,0 +1,12 @@
+[package]
+authors = ["cowboy"]
+edition = "2018"
+name = "rustycraft"
+version = "0.1.0"
+
+[dependencies]
+bevy = "0.4.0"
+anyhow = "1.0"
+rand = "0.7.3"
+ron = "0.6.2"
+serde = {version = "1", features = ["derive"]}
