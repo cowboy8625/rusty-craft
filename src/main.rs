@@ -1,6 +1,8 @@
 mod flycam;
-use flycam::{FlyCameraPlugin, FlyCamera};
+mod fpshud;
 use bevy::prelude::*;
+use flycam::{FlyCamera, FlyCameraPlugin};
+use fpshud::FPSPlugin;
 
 fn main() {
     App::build()
@@ -10,11 +12,13 @@ fn main() {
             // height: 300.,
             vsync: true,
             // resizable: false,
+            cursor_visible: false,
             ..Default::default()
         })
         .add_resource(Msaa { samples: 4 })
         .add_plugins(DefaultPlugins)
         .add_plugin(FlyCameraPlugin)
+        .add_plugin(FPSPlugin)
         .add_startup_system(setup.system())
         .add_system(toggle_cursor.system())
         .run();
@@ -28,19 +32,6 @@ fn setup(
 ) {
     // add entities to the world
     commands
-        // plane
-        .spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Plane { size: 5.0 })),
-            material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
-            ..Default::default()
-        })
-        // cube
-        .spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_translation(Vec3::new(0.0, 0.5, 0.0)),
-            ..Default::default()
-        })
         // light
         .spawn(LightBundle {
             transform: Transform::from_translation(Vec3::new(4.0, 8.0, 4.0)),
@@ -52,6 +43,24 @@ fn setup(
             ..Default::default()
         })
         .with(FlyCamera::default());
+
+    // Boxes
+    let box_mesh = meshes.add(Mesh::from(shape::Cube { size: 0.5 }));
+    let box_material = materials.add(Color::rgb(0.0, 0.5, 0.5).into());
+
+    const AMOUNT: i32 = 6;
+    for x in -(AMOUNT / 2)..(AMOUNT / 2) {
+        for y in -(AMOUNT / 2)..(AMOUNT / 2) {
+            for z in -(AMOUNT / 2)..(AMOUNT / 2) {
+                commands.spawn(PbrBundle {
+                    mesh: box_mesh.clone(),
+                    material: box_material.clone(),
+                    transform: Transform::from_translation(Vec3::new(x as f32, y as f32, z as f32)),
+                    ..Default::default()
+                });
+            }
+        }
+    }
 }
 
 fn toggle_cursor(input: Res<Input<KeyCode>>, mut windows: ResMut<Windows>) {
@@ -61,3 +70,4 @@ fn toggle_cursor(input: Res<Input<KeyCode>>, mut windows: ResMut<Windows>) {
         window.set_cursor_visibility(!window.cursor_visible());
     }
 }
+

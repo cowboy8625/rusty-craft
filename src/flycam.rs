@@ -54,11 +54,7 @@ fn strafe_vector(rotation: &Quat) -> Vec3 {
         .normalize()
 }
 
-fn movement_axis(
-    input: &Res<Input<KeyCode>>,
-    plus: KeyCode,
-    minus: KeyCode,
-    ) -> f32 {
+fn movement_axis(input: &Res<Input<KeyCode>>, plus: KeyCode, minus: KeyCode) -> f32 {
     let mut axis = 0.0;
     if input.pressed(plus) {
         axis += 1.0;
@@ -73,18 +69,14 @@ fn camera_movement_system(
     time: Res<Time>,
     keyboard_input: Res<Input<KeyCode>>,
     mut query: Query<(&mut FlyCamera, &mut Transform)>,
-    ) {
+) {
     for (mut options, mut transform) in query.iter_mut() {
         let (axis_h, axis_v, axis_float) = if options.enabled {
             (
                 movement_axis(&keyboard_input, options.key_right, options.key_left),
-                movement_axis(
-                    &keyboard_input,
-                    options.key_backward,
-                    options.key_forward,
-                    ),
-                    movement_axis(&keyboard_input, options.key_up, options.key_down),
-                    )
+                movement_axis(&keyboard_input, options.key_backward, options.key_forward),
+                movement_axis(&keyboard_input, options.key_up, options.key_down),
+            )
         } else {
             (0.0, 0.0, 0.0)
         };
@@ -114,9 +106,8 @@ fn camera_movement_system(
 
         let delta_friction = friction * time.delta_seconds();
 
-        options.velocity = if (options.velocity + delta_friction).signum()
-            != options.velocity.signum()
-            {
+        options.velocity =
+            if (options.velocity + delta_friction).signum() != options.velocity.signum() {
                 Vec3::zero()
             } else {
                 options.velocity + delta_friction
@@ -136,7 +127,7 @@ fn mouse_motion_system(
     mut state: ResMut<State>,
     mouse_motion_events: Res<Events<MouseMotion>>,
     mut query: Query<(&mut FlyCamera, &mut Transform)>,
-    ) {
+) {
     let mut delta: Vec2 = Vec2::zero();
     for event in state.mouse_motion_event_reader.iter(&mouse_motion_events) {
         delta += event.delta;
@@ -167,8 +158,7 @@ pub struct FlyCameraPlugin;
 
 impl Plugin for FlyCameraPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app
-            .init_resource::<State>()
+        app.init_resource::<State>()
             .add_system(camera_movement_system.system())
             .add_system(mouse_motion_system.system());
     }
