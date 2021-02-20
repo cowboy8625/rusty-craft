@@ -1,4 +1,5 @@
 use bevy::{input::mouse::MouseMotion, math::clamp, prelude::*};
+use crate::{PlayerSettings, Focus};
 
 pub struct FlyCamera {
     pub speed: f32,
@@ -126,7 +127,7 @@ fn mouse_motion_system(
     time: Res<Time>,
     mut state: ResMut<State>,
     mouse_motion_events: Res<Events<MouseMotion>>,
-    mut query: Query<(&mut FlyCamera, &mut Transform)>,
+    mut query: Query<(&mut FlyCamera, &mut Transform, &PlayerSettings)>,
 ) {
     let mut delta: Vec2 = Vec2::zero();
     for event in state.mouse_motion_event_reader.iter(&mouse_motion_events) {
@@ -136,21 +137,23 @@ fn mouse_motion_system(
         return;
     }
 
-    for (mut options, mut transform) in query.iter_mut() {
-        if !options.enabled {
-            continue;
+    for (mut options, mut transform, settings) in query.iter_mut() {
+        if let Focus::Game = settings.focus {
+            if !options.enabled {
+                continue;
+            }
+            options.yaw -= delta.x * options.sensitivity * time.delta_seconds();
+            options.pitch += delta.y * options.sensitivity * time.delta_seconds();
+
+            options.pitch = clamp(options.pitch, -89.9, 89.9);
+            // println!("pitch: {}, yaw: {}", options.pitch, options.yaw);
+
+            let yaw_radians = options.yaw.to_radians();
+            let pitch_radians = options.pitch.to_radians();
+
+            transform.rotation = Quat::from_axis_angle(Vec3::unit_y(), yaw_radians)
+                * Quat::from_axis_angle(-Vec3::unit_x(), pitch_radians);
         }
-        options.yaw -= delta.x * options.sensitivity * time.delta_seconds();
-        options.pitch += delta.y * options.sensitivity * time.delta_seconds();
-
-        options.pitch = clamp(options.pitch, -89.9, 89.9);
-        // println!("pitch: {}, yaw: {}", options.pitch, options.yaw);
-
-        let yaw_radians = options.yaw.to_radians();
-        let pitch_radians = options.pitch.to_radians();
-
-        transform.rotation = Quat::from_axis_angle(Vec3::unit_y(), yaw_radians)
-            * Quat::from_axis_angle(-Vec3::unit_x(), pitch_radians);
     }
 }
 
