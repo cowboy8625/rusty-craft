@@ -35,7 +35,7 @@ fn fps_setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
             },
             text: Text {
                 value: "FPS:".to_string(),
-                font: asset_server.load("/usr/share/fonts/truetype/freefont/FreeMono.ttf"),
+                font: asset_server.load("../assets/font/Minecraftia-Regular.ttf"),
                 style: TextStyle {
                     font_size: 60.0,
                     color: Color::BLUE,
