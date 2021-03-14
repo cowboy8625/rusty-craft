@@ -1,15 +1,15 @@
-use bevy::prelude::*;
+use crate::{GameState, STATE};
 use bevy::diagnostic::{Diagnostics, FrameTimeDiagnosticsPlugin};
+use bevy::prelude::*;
 
 pub struct FPSPlugin;
 impl Plugin for FPSPlugin {
     fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(fps_setup.system())
-            .add_plugin(FrameTimeDiagnosticsPlugin::default())
-            .add_system(fps_update.system());
+        app.add_plugin(FrameTimeDiagnosticsPlugin::default())
+            .on_state_enter(STATE, GameState::InGame, fps_setup.system())
+            .on_state_update(STATE, GameState::InGame, fps_update.system());
     }
 }
-
 
 struct FpsText;
 

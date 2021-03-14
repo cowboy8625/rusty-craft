@@ -1,5 +1,8 @@
+use crate::{
+    game::{Focus, PlayerSettings},
+    GameState, STATE,
+};
 use bevy::{input::mouse::MouseMotion, math::clamp, prelude::*};
-use crate::{PlayerSettings, Focus};
 
 pub struct FlyCamera {
     pub speed: f32,
@@ -162,7 +165,19 @@ pub struct FlyCameraPlugin;
 impl Plugin for FlyCameraPlugin {
     fn build(&self, app: &mut AppBuilder) {
         app.init_resource::<State>()
-            .add_system(camera_movement_system.system())
-            .add_system(mouse_motion_system.system());
+            .on_state_enter(STATE, GameState::InGame, setup.system())
+            .on_state_update(STATE, GameState::InGame, camera_movement_system.system())
+            .on_state_update(STATE, GameState::InGame, mouse_motion_system.system());
     }
+}
+
+fn setup(commands: &mut Commands) {
+    commands
+        .spawn(Camera3dBundle {
+            transform: Transform::from_translation(Vec3::new(-2.0, 2.5, 5.0))
+                .looking_at(Vec3::default(), Vec3::unit_y()),
+            ..Default::default()
+        })
+        .with(FlyCamera::default())
+        .with(PlayerSettings { focus: Focus::Game });
 }
