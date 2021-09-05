@@ -5,9 +5,6 @@ version = "0.0.1"
 edition = "2018"
 
 [dependencies]
-bevy = "0.4.0"
-bevy_prototype_lyon = "0.2"
-# anyhow = "1.0"
-# rand = "0.7.3"
-# ron = "0.6.2"
-# serde = {version = "1", features = ["derive"]}
+bevy = "0.5.0"
+bevy_mod_picking = "0.4.0"
+bevy_flycam = { git = "https://github.com/sburris0/bevy_flycam" }
