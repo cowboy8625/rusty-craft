@@ -5,6 +5,18 @@ version = "0.0.1"
 edition = "2018"
 
 [dependencies]
-bevy = "0.5.0"
-bevy_mod_picking = "0.4.0"
-bevy_flycam = { git = "https://github.com/sburris0/bevy_flycam" }
+bevy = { version = "0.12.0", features = ["dynamic_linking"] }
+#bevy_mod_picking = "0.12.0"
+bevy_flycam = "0.12.0"
+
+[workspace]
+resolver = "2"
+
+# Enable a small amount of optimization in debug mode
+[profile.dev]
+opt-level = 1
+
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
+
