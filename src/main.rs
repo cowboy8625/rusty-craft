@@ -4,7 +4,6 @@ use std::f32::consts::PI;
 use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
-    winit::WinitSettings,
 };
 use bevy_flycam::{KeyBindings, MovementSettings, PlayerPlugin};
 
@@ -24,7 +23,7 @@ fn main() {
         })
         .add_systems(Startup, setup)
         .add_systems(Update, rotate)
-        .add_systems(Update, button_system)
+        .add_systems(Update, player_place_block_system)
         .run();
 }
 
@@ -39,7 +38,6 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    asset_server: Res<AssetServer>,
 ) {
     let debug_material = materials.add(StandardMaterial {
         base_color_texture: Some(images.add(uv_debug_texture())),
@@ -181,40 +179,33 @@ fn uv_debug_texture() -> Image {
     )
 }
 
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
-
-fn button_system(
-    mut interaction_query: Query<
-        (
-            &Interaction,
-            &mut BackgroundColor,
-            &mut BorderColor,
-            &Children,
-        ),
-        (Changed<Interaction>, With<Button>),
-    >,
-    mut text_query: Query<&mut Text>,
+fn player_place_block_system(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut images: ResMut<Assets<Image>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mouse_input: Res<Input<MouseButton>>,
 ) {
-    for (interaction, mut color, mut border_color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                text.sections[0].value = "Press".to_string();
-                *color = PRESSED_BUTTON.into();
-                border_color.0 = Color::RED;
-            }
-            Interaction::Hovered => {
-                text.sections[0].value = "Hover".to_string();
-                *color = HOVERED_BUTTON.into();
-                border_color.0 = Color::WHITE;
-            }
-            Interaction::None => {
-                text.sections[0].value = "Button".to_string();
-                *color = NORMAL_BUTTON.into();
-                border_color.0 = Color::BLACK;
-            }
-        }
+    if !mouse_input.just_released(MouseButton::Left) {
+        return;
     }
+    info!("player_place_block_system");
+    let debug_material = materials.add(StandardMaterial {
+        base_color_texture: Some(images.add(uv_debug_texture())),
+        ..default()
+    });
+    let shape = meshes.add(shape::Cube::default().into());
+    let num_shapes = 8;
+    let i = 10;
+    commands.spawn((PbrBundle {
+        mesh: shape,
+        material: debug_material.clone(),
+        transform: Transform::from_xyz(
+            -X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * X_EXTENT,
+            2.0,
+            0.0,
+        ),
+        // .with_rotation(Quat::from_rotation_x(-PI / 4.)),
+        ..default()
+    },));
 }

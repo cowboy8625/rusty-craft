@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 bevy = { version = "0.12.0", features = ["dynamic_linking"] }
-#bevy_mod_picking = "0.12.0"
+bevy_mod_picking = "0.17.0"
 bevy_flycam = "0.12.0"
 
 [workspace]
